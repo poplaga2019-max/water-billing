@@ -4,12 +4,28 @@ include 'config/db.php';
 
 if(!isset($_SESSION['user'])){
     header("Location: login.php");
+    exit();
 }
 
 $id = $_GET['id'];
 
+// ดึงข้อมูลลูกบ้าน
 $cust = $conn->query("SELECT * FROM customers WHERE id=$id")->fetch_assoc();
 
+// 🔁 หาบ้านก่อนหน้า / ถัดไป
+$list = $conn->query("SELECT id FROM customers ORDER BY id ASC");
+
+$ids = [];
+while($row = $list->fetch_assoc()){
+    $ids[] = $row['id'];
+}
+
+$current_index = array_search($id, $ids);
+
+$prev_id = $ids[$current_index - 1] ?? null;
+$next_id = $ids[$current_index + 1] ?? null;
+
+// 🔽 เมื่อกดบันทึก
 if(isset($_POST['save'])){
     $new = $_POST['new_unit'];
     $old = $cust['last_unit'];
@@ -21,6 +37,7 @@ if(isset($_POST['save'])){
         $used = $new - $old;
         $amount = 0;
 
+        // คำนวณขั้นบันได
         $rates = $conn->query("SELECT * FROM water_rates");
 
         while($r = $rates->fetch_assoc()){
@@ -43,7 +60,13 @@ if(isset($_POST['save'])){
         // อัปเดตมิเตอร์
         $conn->query("UPDATE customers SET last_unit=$new WHERE id=$id");
 
-        header("Location: customers.php");
+        // 👉 ไปบ้านถัดไปอัตโนมัติ
+        if($next_id){
+            header("Location: meter.php?id=".$next_id);
+        }else{
+            header("Location: customers.php");
+        }
+        exit();
     }
 }
 ?>
@@ -78,9 +101,24 @@ if(isset($_POST['save'])){
 
 </div>
 
+<!-- ปุ่มก่อนหน้า / ถัดไป -->
+<div class="d-flex justify-content-between mt-3">
+
+    <?php if($prev_id){ ?>
+        <a href="meter.php?id=<?= $prev_id ?>" class="btn btn-secondary">⬅️ บ้านก่อนหน้า</a>
+    <?php }else{ ?>
+        <div></div>
+    <?php } ?>
+
+    <?php if($next_id){ ?>
+        <a href="meter.php?id=<?= $next_id ?>" class="btn btn-success">บ้านถัดไป ➡️</a>
+    <?php } ?>
+
+</div>
+
 <br>
 
-<a href="customers.php" class="btn btn-secondary w-100">⬅ กลับ</a>
+<a href="customers.php" class="btn btn-dark w-100">⬅ กลับหน้ารายการ</a>
 
 </body>
 </html>
