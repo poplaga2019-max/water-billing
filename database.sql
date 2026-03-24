@@ -44,3 +44,7 @@ INSERT INTO water_rates (min_unit, max_unit, price_per_unit) VALUES
 (51, 100, 7),
 (101, 9999, 10);
 ALTER TABLE bills ADD status VARCHAR(20) DEFAULT 'unpaid';
+ALTER TABLE customers ADD username VARCHAR(50), ADD password VARCHAR(50);
+
+UPDATE customers SET username='home1', password='1234' WHERE id=1;
+UPDATE customers SET username='home2', password='1234' WHERE id=2;
