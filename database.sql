@@ -43,3 +43,4 @@ INSERT INTO water_rates (min_unit, max_unit, price_per_unit) VALUES
 (1, 50, 5),
 (51, 100, 7),
 (101, 9999, 10);
+ALTER TABLE bills ADD status VARCHAR(20) DEFAULT 'unpaid';
