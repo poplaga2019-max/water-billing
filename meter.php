@@ -13,8 +13,16 @@ if(isset($_POST['save'])){
     if($new < $old){
         echo "เลขผิด";
     }else{
-        $conn->query("UPDATE customers SET last_unit=$new WHERE id=$id");
-        header("Location: customers.php");
+        $used = $new - $old;
+$rate = 10; // หน่วยละ 10 บาท (เดี๋ยวเราทำให้ปรับได้ทีหลัง)
+$amount = $used * $rate;
+
+// บันทึกบิล
+$conn->query("INSERT INTO bills (customer_id, old_unit, new_unit, used_unit, amount)
+VALUES ($id, $old, $new, $used, $amount)");
+
+// อัปเดตมิเตอร์
+$conn->query("UPDATE customers SET last_unit=$new WHERE id=$id");
     }
 }
 ?>
