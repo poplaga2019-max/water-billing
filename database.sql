@@ -58,11 +58,12 @@ CREATE TABLE bills (
 );
 
 
--- ⚙️ ตั้งค่าระบบ (White-label)
+-- ⚙️ ตั้งค่าระบบ (ชื่อ + โลโก้)
 CREATE TABLE settings (
     id INT PRIMARY KEY,
-    site_name VARCHAR(255)
+    site_name VARCHAR(255),
+    logo VARCHAR(255)
 );
 
-INSERT INTO settings (id, site_name) VALUES
-(1, 'ระบบประปาหมู่บ้าน');
+INSERT INTO settings (id, site_name, logo) VALUES
+(1, 'ระบบประปาหมู่บ้าน', '');
