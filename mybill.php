@@ -4,6 +4,7 @@ include 'config/db.php';
 
 if(!isset($_SESSION['customer'])){
     header("Location: login.php");
+    exit();
 }
 
 $cid = $_SESSION['customer']['id'];
@@ -25,15 +26,17 @@ ORDER BY id DESC
 
 <body class="container mt-4" style="font-family: THSarabun, sans-serif;">
 
-<h2 class="mb-3">💧 บิลของฉัน</h2>
+<h2 class="mb-3 text-center">💧 บิลของฉัน</h2>
 
 <!-- QR พร้อมเพย์ -->
 <div class="text-center mb-4">
     <img src="https://promptpay.io/0801234567.png" width="200">
-    <p class="text-success">สแกนเพื่อชำระเงิน</p>
-    <p>โอนเงินได้ที่: 080-123-4567</p>
+    <p class="text-success">📱 สแกนเพื่อชำระเงิน</p>
+    <p>โอนเงินได้ที่: <strong>080-123-4567</strong></p>
 </div>
 
+<!-- ตารางบิล -->
+<div class="table-responsive">
 <table class="table table-bordered text-center">
 <tr class="table-dark">
     <th>หน่วยใช้</th>
@@ -60,7 +63,7 @@ ORDER BY id DESC
             <form action="upload.php" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="id" value="<?= $row['id'] ?>">
                 <input type="file" name="slip" class="form-control mb-2" required>
-                <button class="btn btn-primary btn-sm w-100">อัปโหลดสลิป</button>
+                <button class="btn btn-primary btn-sm w-100">📤 อัปโหลดสลิป</button>
             </form>
         <?php }else{ ?>
             ✔
@@ -70,8 +73,10 @@ ORDER BY id DESC
 <?php } ?>
 
 </table>
+</div>
 
-<a href="logout.php" class="btn btn-danger w-100">ออกจากระบบ</a>
+<!-- ปุ่ม -->
+<a href="logout.php" class="btn btn-danger w-100 mt-3">ออกจากระบบ</a>
 
 </body>
 </html>
