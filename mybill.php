@@ -23,7 +23,7 @@ ORDER BY id DESC
 <body style="font-family: THSarabun, sans-serif;">
 
 <h2>บิลของฉัน</h2>
-
+<p>โอนเงินได้ที่: 080-xxx-xxxx</p>
 <table border="1" cellpadding="5">
 <tr>
     <th>หน่วยใช้</th>
