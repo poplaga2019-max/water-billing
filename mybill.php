@@ -23,6 +23,8 @@ ORDER BY id DESC
 <body style="font-family: THSarabun, sans-serif;">
 
 <h2>บิลของฉัน</h2>
+    <img src="https://promptpay.io/0801234567.png" width="200">
+<p>สแกน QR เพื่อชำระเงิน</p>
 <p>โอนเงินได้ที่: 080-xxx-xxxx</p>
 <table border="1" cellpadding="5">
 <tr>
