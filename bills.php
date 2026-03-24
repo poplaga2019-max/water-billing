@@ -1,40 +1,32 @@
-<?php
-session_start();
-include 'config/db.php';
+<table border="1" cellpadding="5">
+<tr>
+    <th>ชื่อ</th>
+    <th>หน่วยใช้</th>
+    <th>จำนวนเงิน</th>
+    <th>สถานะ</th>
+    <th>จัดการ</th>
+</tr>
 
-$res = $conn->query("
-SELECT b.*, c.name 
-FROM bills b 
-JOIN customers c ON b.customer_id = c.id
-ORDER BY b.id DESC
-");
-?>
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>บิลค่าน้ำ</title>
-</head>
-<body style="font-family: THSarabun, sans-serif;">
-    <h2>บิลค่าน้ำ</h2>
-
-    <table border="1" cellpadding="5">
-        <tr>
-            <th>ชื่อ</th>
-            <th>หน่วยใช้</th>
-            <th>จำนวนเงิน</th>
-            <th>วันที่</th>
-        </tr>
-
-        <?php while($row = $res->fetch_assoc()){ ?>
-        <tr>
-            <td><?= $row['name'] ?></td>
-            <td><?= $row['used_unit'] ?></td>
-            <td><?= $row['amount'] ?> บาท</td>
-            <td><?= $row['created_at'] ?></td>
-        </tr>
+<?php while($row = $res->fetch_assoc()){ ?>
+<tr>
+    <td><?= $row['name'] ?></td>
+    <td><?= $row['used_unit'] ?></td>
+    <td><?= $row['amount'] ?> บาท</td>
+    <td>
+        <?php if($row['status']=='paid'){ ?>
+            <span style="color:green;">จ่ายแล้ว</span>
+        <?php }else{ ?>
+            <span style="color:red;">ยังไม่จ่าย</span>
         <?php } ?>
-    </table>
+    </td>
+    <td>
+        <?php if($row['status']!='paid'){ ?>
+            <a href="pay.php?id=<?= $row['id'] ?>">รับเงิน</a>
+        <?php } ?>
+    </td>
+</tr>
+<?php } ?>
+</table>    </table>
 
 </body>
 </html>
