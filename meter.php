@@ -14,8 +14,22 @@ if(isset($_POST['save'])){
         echo "เลขผิด";
     }else{
         $used = $new - $old;
-$rate = 10; // หน่วยละ 10 บาท (เดี๋ยวเราทำให้ปรับได้ทีหลัง)
-$amount = $used * $rate;
+$amount = 0;
+
+$rates = $conn->query("SELECT * FROM water_rates");
+
+while($r = $rates->fetch_assoc()){
+    $min = $r['min_unit'];
+    $max = $r['max_unit'];
+    $price = $r['price_per_unit'];
+
+    if($used >= $min){
+        $unit_in_step = min($used, $max) - $min + 1;
+        if($unit_in_step > 0){
+            $amount += $unit_in_step * $price;
+        }
+    }
+}
 
 // บันทึกบิล
 $conn->query("INSERT INTO bills (customer_id, old_unit, new_unit, used_unit, amount)
