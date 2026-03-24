@@ -46,16 +46,32 @@ if($res->num_rows > 0){
 <html>
 <head>
     <title>เข้าสู่ระบบ</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body style="font-family: THSarabun, sans-serif;">
-    <h2>เข้าสู่ระบบ</h2>
 
-    <?php if(isset($error)) echo "<p style='color:red;'>$error</p>"; ?>
+<body class="container mt-5" style="font-family: THSarabun, sans-serif;">
 
-    <form method="POST">
-        <input type="text" name="username" placeholder="ชื่อผู้ใช้" required><br><br>
-        <input type="password" name="password" placeholder="รหัสผ่าน" required><br><br>
-        <button name="login">เข้าสู่ระบบ</button>
-    </form>
+<div class="row justify-content-center">
+    <div class="col-md-4">
+
+        <div class="card p-4 shadow">
+            <h3 class="text-center mb-3">เข้าสู่ระบบ</h3>
+
+            <?php if(isset($error)) echo "<div class='alert alert-danger'>$error</div>"; ?>
+
+            <form method="POST">
+                <input type="text" name="username" class="form-control mb-3" placeholder="ชื่อผู้ใช้" required>
+
+                <input type="password" name="password" class="form-control mb-3" placeholder="รหัสผ่าน" required>
+
+                <button name="login" class="btn btn-primary w-100">เข้าสู่ระบบ</button>
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
 </body>
 </html>
