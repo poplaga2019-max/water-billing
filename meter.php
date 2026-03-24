@@ -10,6 +10,7 @@ if(!isset($_SESSION['user'])){
 
 $id = $_GET['id'] ?? 1;
 
+// โหลดลูกค้า
 $list = $conn->query("SELECT * FROM customers ORDER BY id");
 $customers = [];
 while($c = $list->fetch_assoc()){
@@ -35,6 +36,7 @@ if(isset($_POST['save'])){
     $new = $_POST['new_unit'];
     $used = $new - $old;
 
+    // คิดเงิน
     $amount = 0;
     $rates = $conn->query("SELECT * FROM water_rates");
 
@@ -45,16 +47,42 @@ if(isset($_POST['save'])){
         }
     }
 
-    $today = date('Y-m-d');
+    // ===== รอบบิล =====
+    $set = $conn->query("SELECT cycle_day FROM settings WHERE id=1")->fetch_assoc();
+    $cycle_day = $set['cycle_day'];
+
+    $day = date('d');
+    $month = date('m');
+    $year = date('Y');
+
+    if($day < $cycle_day){
+        $month--;
+        if($month <= 0){
+            $month = 12;
+            $year--;
+        }
+    }
+
+    $billing_cycle = $year . "-" . str_pad($month,2,'0',STR_PAD_LEFT);
+    $bill_date = $billing_cycle . "-" . str_pad($cycle_day,2,'0',STR_PAD_LEFT);
+
     $staff_id = $_SESSION['user']['id'];
 
     $conn->query("
-    INSERT INTO bills (customer_id, old_unit, new_unit, used_unit, amount, bill_date, staff_id)
-    VALUES ($id, $old, $new, $used, $amount, '$today', $staff_id)
+    INSERT INTO bills (
+        customer_id, old_unit, new_unit, used_unit, amount,
+        bill_date, staff_id, billing_cycle
+    )
+    VALUES (
+        $id, $old, $new, $used, $amount,
+        '$bill_date', $staff_id, '$billing_cycle'
+    )
     ");
 
+    // update meter
     $conn->query("UPDATE customers SET last_unit=$new WHERE id=$id");
 
+    // telegram
     $msg = "📋 จดมิเตอร์\n👤 ".$cust['name']."\n💧 ".$used." หน่วย";
     sendTelegram($msg, 'meter');
 
@@ -62,40 +90,3 @@ if(isset($_POST['save'])){
     exit();
 }
 ?>
-
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-
-<body class="container mt-3">
-
-<h4>📋 จดมิเตอร์</h4>
-
-<div class="card p-3">
-
-<h5><?= $cust['name'] ?></h5>
-<p><?= $cust['address'] ?></p>
-<p>เลขล่าสุด: <?= $cust['last_unit'] ?></p>
-
-<?php if(!empty($cust['lat'])){ ?>
-<a href="https://www.google.com/maps/dir/?api=1&destination=<?= $cust['lat'] ?>,<?= $cust['lng'] ?>"
-class="btn btn-success w-100 mb-2">🚗 นำทาง</a>
-<?php } ?>
-
-<form method="POST">
-<input type="number" name="new_unit" class="form-control mb-2" required>
-<button name="save" class="btn btn-primary w-100">บันทึก</button>
-</form>
-
-</div>
-
-<div class="d-flex justify-content-between mt-2">
-<a href="meter.php?id=<?= $prev ?>" class="btn btn-secondary">⬅</a>
-<a href="meter.php?id=<?= $next ?>" class="btn btn-primary">➡</a>
-</div>
-
-</body>
-</html>
