@@ -5,8 +5,30 @@ include 'config/db.php';
 if(isset($_POST['login'])){
     $user = $_POST['username'];
     $pass = $_POST['password'];
+$sql = "SELECT * FROM users WHERE username='$user' AND password='$pass'";
+$res = $conn->query($sql);
 
-    $sql = "SELECT * FROM users WHERE username='$user' AND password='$pass'";
+if($res->num_rows > 0){
+    $data = $res->fetch_assoc();
+    $_SESSION['user'] = $data;
+    $_SESSION['role'] = 'admin';
+
+    header("Location: dashboard.php");
+}else{
+    // ลองเช็คลูกบ้าน
+    $sql2 = "SELECT * FROM customers WHERE username='$user' AND password='$pass'";
+    $res2 = $conn->query($sql2);
+
+    if($res2->num_rows > 0){
+        $data = $res2->fetch_assoc();
+        $_SESSION['customer'] = $data;
+        $_SESSION['role'] = 'customer';
+
+        header("Location: mybill.php");
+    }else{
+        $error = "ชื่อผู้ใช้หรือรหัสผ่านผิด";
+    }
+}
     $res = $conn->query($sql);
 
     if($res->num_rows > 0){
