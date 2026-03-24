@@ -1,6 +1,7 @@
 CREATE DATABASE water_db;
 USE water_db;
 
+-- 👤 ผู้ใช้งาน (admin / staff)
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50),
@@ -12,26 +13,24 @@ INSERT INTO users (username, password, role) VALUES
 ('admin', '1234', 'admin'),
 ('staff', '1234', 'staff');
 
+
+-- 👨‍👩‍👧‍👦 ลูกบ้าน
 CREATE TABLE customers (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100),
     address TEXT,
     meter_no VARCHAR(50),
-    last_unit INT DEFAULT 0
+    last_unit INT DEFAULT 0,
+    username VARCHAR(50),
+    password VARCHAR(50)
 );
 
-INSERT INTO customers (name, address, meter_no, last_unit) VALUES
-('สมชาย', 'บ้านเลขที่ 12', 'M001', 120),
-('สมหญิง', 'บ้านเลขที่ 15', 'M002', 90);
-CREATE TABLE bills (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    customer_id INT,
-    old_unit INT,
-    new_unit INT,
-    used_unit INT,
-    amount INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+INSERT INTO customers (name, address, meter_no, last_unit, username, password) VALUES
+('สมชาย', 'บ้านเลขที่ 12', 'M001', 120, 'home1', '1234'),
+('สมหญิง', 'บ้านเลขที่ 15', 'M002', 90, 'home2', '1234');
+
+
+-- 💧 ค่าน้ำแบบขั้นบันได
 CREATE TABLE water_rates (
     id INT AUTO_INCREMENT PRIMARY KEY,
     min_unit INT,
@@ -43,9 +42,27 @@ INSERT INTO water_rates (min_unit, max_unit, price_per_unit) VALUES
 (1, 50, 5),
 (51, 100, 7),
 (101, 9999, 10);
-ALTER TABLE bills ADD status VARCHAR(20) DEFAULT 'unpaid';
-ALTER TABLE customers ADD username VARCHAR(50), ADD password VARCHAR(50);
 
-UPDATE customers SET username='home1', password='1234' WHERE id=1;
-UPDATE customers SET username='home2', password='1234' WHERE id=2;
-ALTER TABLE bills ADD slip VARCHAR(255);
+
+-- 🧾 บิลค่าน้ำ
+CREATE TABLE bills (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT,
+    old_unit INT,
+    new_unit INT,
+    used_unit INT,
+    amount INT,
+    status VARCHAR(20) DEFAULT 'unpaid',
+    slip VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- ⚙️ ตั้งค่าระบบ (White-label)
+CREATE TABLE settings (
+    id INT PRIMARY KEY,
+    site_name VARCHAR(255)
+);
+
+INSERT INTO settings (id, site_name) VALUES
+(1, 'ระบบประปาหมู่บ้าน');
