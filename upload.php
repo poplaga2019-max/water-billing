@@ -1,7 +1,9 @@
 <?php
 session_start();
 include 'config/db.php';
+include 'notify.php';
 
+// เช็ค login ลูกบ้าน
 if(!isset($_SESSION['customer'])){
     header("Location: login.php");
     exit();
@@ -9,7 +11,7 @@ if(!isset($_SESSION['customer'])){
 
 $id = $_POST['id'];
 
-// ตรวจว่ามีไฟล์ไหม
+// ตรวจไฟล์
 if(isset($_FILES['slip']) && $_FILES['slip']['error'] == 0){
 
     $allowed = ['jpg','jpeg','png','pdf'];
@@ -21,7 +23,7 @@ if(isset($_FILES['slip']) && $_FILES['slip']['error'] == 0){
 
     if(in_array($ext, $allowed)){
 
-        // ตั้งชื่อใหม่กันซ้ำ
+        // ตั้งชื่อไฟล์ใหม่
         $new_name = "uploads/" . time() . "_" . rand(1000,9999) . "." . $ext;
 
         // ย้ายไฟล์
@@ -30,13 +32,19 @@ if(isset($_FILES['slip']) && $_FILES['slip']['error'] == 0){
             // บันทึกลง DB
             $conn->query("UPDATE bills SET slip='$new_name' WHERE id=$id");
 
+            // 🔔 แจ้ง Telegram (ห้องการเงิน)
+            $msg = "💸 มีการโอนเงิน\n";
+            $msg .= "บิล ID: $id";
+
+            sendTelegram($msg, 'payment');
+
         }else{
             echo "อัปโหลดไม่สำเร็จ";
             exit();
         }
 
     }else{
-        echo "รองรับเฉพาะ jpg, png, pdf";
+        echo "รองรับเฉพาะ jpg, jpeg, png, pdf";
         exit();
     }
 
@@ -48,3 +56,4 @@ if(isset($_FILES['slip']) && $_FILES['slip']['error'] == 0){
 // กลับหน้าเดิม
 header("Location: mybill.php");
 exit();
+?>
