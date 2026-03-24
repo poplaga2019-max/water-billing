@@ -12,5 +12,6 @@ include 'config/db.php';
     <h2>ระบบประปาหมู่บ้าน</h2>
 
     <a href="login.php">เข้าสู่ระบบ</a>
+<a href="customers.php">เข้าระบบจดมิเตอร์</a>
 </body>
 </html>
