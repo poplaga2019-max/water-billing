@@ -32,3 +32,14 @@ CREATE TABLE bills (
     amount INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE water_rates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    min_unit INT,
+    max_unit INT,
+    price_per_unit INT
+);
+
+INSERT INTO water_rates (min_unit, max_unit, price_per_unit) VALUES
+(1, 50, 5),
+(51, 100, 7),
+(101, 9999, 10);
