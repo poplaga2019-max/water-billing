@@ -1,7 +1,7 @@
 CREATE DATABASE water_db;
 USE water_db;
 
--- 👤 ผู้ใช้งาน
+-- 👤 ผู้ใช้งาน (admin / staff)
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50),
@@ -44,7 +44,7 @@ INSERT INTO water_rates (min_unit, max_unit, price_per_unit) VALUES
 (101, 9999, 10);
 
 
--- 🧾 บิล
+-- 🧾 บิลค่าน้ำ (อัปเกรดแล้ว)
 CREATE TABLE bills (
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT,
@@ -52,8 +52,11 @@ CREATE TABLE bills (
     new_unit INT,
     used_unit INT,
     amount INT,
+
     status VARCHAR(20) DEFAULT 'unpaid',
     slip VARCHAR(255),
+
+    bill_date DATE, -- ใช้สำหรับ dashboard
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -61,6 +64,7 @@ CREATE TABLE bills (
 -- ⚙️ ตั้งค่าระบบ
 CREATE TABLE settings (
     id INT PRIMARY KEY,
+
     site_name VARCHAR(255),
     logo VARCHAR(255),
 
