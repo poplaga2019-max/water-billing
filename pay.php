@@ -12,10 +12,21 @@ JOIN customers c ON b.customer_id=c.id
 WHERE b.id=$id
 ")->fetch_assoc();
 
-$conn->query("UPDATE bills SET status='paid' WHERE id=$id");
+// 🔒 เช็ค lock
+if($data['is_locked'] == 1 && $_SESSION['user']['role'] != 'admin'){
+    echo "❌ รอบบิลนี้ถูกปิดแล้ว";
+    exit();
+}
 
-$msg = "💵 รับเงินสด\nลูกค้า: ".$data['name']."\nยอด: ".$data['amount']." บาท";
-sendTelegram($msg, 'payment');
+// ❗ เปลี่ยนเป็น pending
+$conn->query("UPDATE bills SET status='pending' WHERE id=$id");
+
+// แจ้ง Telegram
+$msg = "💵 รับเงินสด (รอตรวจสอบ)\n";
+$msg .= "👤 ".$data['name']."\n";
+$msg .= "💰 ".$data['amount']." บาท";
+
+sendTelegram($msg,'payment');
 
 header("Location: bills.php");
 ?>
