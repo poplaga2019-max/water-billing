@@ -13,7 +13,6 @@ if(!isset($_SESSION['user'])){
     exit();
 }
 
-// ===== QUERY =====
 $res = $conn->query("
 SELECT b.*, c.name 
 FROM bills b
@@ -25,6 +24,7 @@ ORDER BY b.id DESC
 <!DOCTYPE html>
 <html>
 <head>
+<title>รายการบิล</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
@@ -64,9 +64,19 @@ $color = [
 </td>
 
 <td>
-<a href="pay.php?id=<?=$r['id']?>" class="btn btn-success btn-sm">💵</a>
-<a href="upload.php?id=<?=$r['id']?>" class="btn btn-warning btn-sm">📤</a>
-<a href="receipt.php?id=<?=$r['id']?>" class="btn btn-primary btn-sm">🧾</a>
+
+<a href="pay.php?id=<?=$r['id']?>" class="btn btn-success btn-sm">
+💵 เงินสด
+</a>
+
+<a href="upload.php?id=<?=$r['id']?>" class="btn btn-warning btn-sm">
+📤 โอน
+</a>
+
+<a href="receipt.php?id=<?=$r['id']?>" target="_blank" class="btn btn-primary btn-sm">
+🧾 ใบเสร็จ
+</a>
+
 </td>
 
 </tr>
