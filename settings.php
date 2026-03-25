@@ -2,119 +2,69 @@
 session_start();
 include 'config/db.php';
 
-if(!isset($_SESSION['user'])){
-    header("Location: login.php");
-    exit();
+if(!isset($_SESSION['user']) || $_SESSION['user']['role']!='admin'){
+    die('no permission');
 }
 
-// ดึงค่าเดิม
-$set = $conn->query("SELECT * FROM settings WHERE id=1")->fetch_assoc();
+// load
+$s = [];
+$rs = $conn->query("SELECT * FROM settings");
+while($r=$rs->fetch_assoc()){ $s[$r['name']]=$r['value']; }
 
-
-// 💾 บันทึกชื่อระบบ
-if(isset($_POST['save_name'])){
-    $name = $_POST['site_name'];
-    $conn->query("UPDATE settings SET site_name='$name' WHERE id=1");
-}
-
-
-// 🖼️ อัปโหลดโลโก้
-if(isset($_POST['upload_logo'])){
-    $path = "uploads/logo.png";
-    move_uploaded_file($_FILES['logo']['tmp_name'], $path);
-
-    $conn->query("UPDATE settings SET logo='$path' WHERE id=1");
-}
-
-
-// 📢 บันทึก Telegram
-if(isset($_POST['save_tg'])){
+// save
+if(isset($_POST['save'])){
+    $site = $_POST['site_name'];
+    $pp = $_POST['promptpay'];
     $token = $_POST['telegram_token'];
-    $meter = $_POST['telegram_meter'];
-    $payment = $_POST['telegram_payment'];
+    $chat_fin = $_POST['telegram_chat_finance'];
 
-    $conn->query("
-        UPDATE settings SET
-        telegram_token='$token',
-        telegram_meter='$meter',
-        telegram_payment='$payment'
-        WHERE id=1
-    ");
+    $conn->query("REPLACE INTO settings VALUES('site_name','$site')");
+    $conn->query("REPLACE INTO settings VALUES('promptpay','$pp')");
+    $conn->query("REPLACE INTO settings VALUES('telegram_token','$token')");
+    $conn->query("REPLACE INTO settings VALUES('telegram_chat_finance','$chat_fin')");
+
+    // upload logo
+    if(!empty($_FILES['logo']['name'])){
+        if(!is_dir('uploads')) mkdir('uploads');
+        $path = 'uploads/logo.png';
+        move_uploaded_file($_FILES['logo']['tmp_name'],$path);
+        $conn->query("REPLACE INTO settings VALUES('logo','$path')");
+    }
+
+    header("Location: setting.php");
 }
-
-// reload ค่าใหม่
-$set = $conn->query("SELECT * FROM settings WHERE id=1")->fetch_assoc();
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ตั้งค่า</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
+<body class="container mt-3">
 
-<body class="container mt-4" style="font-family: THSarabun, sans-serif;">
+<h4>⚙️ ตั้งค่า</h4>
 
-<h2 class="mb-3">⚙️ ตั้งค่าระบบ</h2>
-
-<!-- 🏷️ ชื่อระบบ -->
-<div class="card p-3 shadow mb-4">
-<form method="POST">
-    <label>ชื่อระบบ</label>
-    <input type="text" name="site_name" class="form-control mb-2"
-           value="<?= $set['site_name'] ?>" required>
-
-    <button name="save_name" class="btn btn-success w-100">
-        💾 บันทึกชื่อระบบ
-    </button>
-</form>
-</div>
-
-
-<!-- 🖼️ โลโก้ -->
-<div class="card p-3 shadow mb-4">
 <form method="POST" enctype="multipart/form-data">
-    <label>โลโก้</label>
-    <input type="file" name="logo" class="form-control mb-2">
 
-    <button name="upload_logo" class="btn btn-primary w-100">
-        อัปโหลดโลโก้
-    </button>
-</form>
+<p>ชื่อระบบ</p>
+<input name="site_name" value="<?= $s['site_name'] ?? '' ?>">
 
-<?php if(!empty($set['logo'])){ ?>
-    <img src="<?= $set['logo'] ?>" width="100">
-<?php } ?>
-</div>
+<p>PromptPay</p>
+<input name="promptpay" value="<?= $s['promptpay'] ?? '' ?>">
 
+<p>Telegram Token</p>
+<input name="telegram_token" value="<?= $s['telegram_token'] ?? '' ?>">
 
-<!-- 📢 Telegram -->
-<div class="card p-3 shadow mb-4">
-<form method="POST">
+<p>Chat Finance</p>
+<input name="telegram_chat_finance" value="<?= $s['telegram_chat_finance'] ?? '' ?>">
 
-    <label>Telegram Token</label>
-    <input type="text" name="telegram_token" class="form-control mb-2"
-           value="<?= $set['telegram_token'] ?>">
+<p>Logo</p>
+<input type="file" name="logo">
 
-    <label>ห้องจดมิเตอร์</label>
-    <input type="text" name="telegram_meter" class="form-control mb-2"
-           value="<?= $set['telegram_meter'] ?>">
-
-    <label>ห้องการเงิน</label>
-    <input type="text" name="telegram_payment" class="form-control mb-2"
-           value="<?= $set['telegram_payment'] ?>">
-
-    <button name="save_tg" class="btn btn-warning w-100">
-        💾 บันทึก Telegram
-    </button>
+<br><br>
+<button name="save">บันทึก</button>
 
 </form>
-</div>
-
-
-<a href="dashboard.php" class="btn btn-secondary w-100">
-⬅ กลับแดชบอร์ด
-</a>
 
 </body>
 </html>
