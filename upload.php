@@ -2,49 +2,46 @@
 session_start();
 include 'config/db.php';
 
-// ลูกบ้าน login
-if(!isset($_SESSION['customer'])){
+if(!isset($_SESSION['user'])){
     header("Location: login.php");
     exit();
 }
 
-$id = $_POST['id'];
+$id = $_GET['id'];
 
-// ดึงข้อมูล
-$data = $conn->query("
-SELECT b.*, c.name 
-FROM bills b
-JOIN customers c ON b.customer_id=c.id
-WHERE b.id=$id
-")->fetch_assoc();
+if(isset($_POST['upload'])){
 
-if(isset($_FILES['slip']) && $_FILES['slip']['error']==0){
+    $file = time().'_'.$_FILES['slip']['name'];
+    $tmp = $_FILES['slip']['tmp_name'];
 
-    $ext = strtolower(pathinfo($_FILES['slip']['name'], PATHINFO_EXTENSION));
-    $allowed = ['jpg','jpeg','png','pdf'];
+    $path = "uploads/".$file;
 
-    if(in_array($ext,$allowed)){
+    move_uploaded_file($tmp,$path);
 
-        $new_name = "uploads/".time()."_".rand(1000,9999).".".$ext;
-        move_uploaded_file($_FILES['slip']['tmp_name'],$new_name);
+    $conn->query("
+    UPDATE bills 
+    SET slip='$path',status='verify' 
+    WHERE id=$id
+    ");
 
-        // ✅ เปลี่ยนเป็น pending
-        $conn->query("
-        UPDATE bills 
-        SET slip='$new_name', status='pending'
-        WHERE id=$id
-        ");
-
-        // Telegram
-        include 'notify.php';
-
-        $msg = "📩 มีการโอนเงิน (รอตรวจสอบ)\n";
-        $msg .= "👤 ".$data['name']."\n";
-        $msg .= "💰 ".number_format($data['amount'])." บาท";
-
-        sendTelegram($msg,'payment');
-    }
+    header("Location: bills_mobile.php");
 }
-
-header("Location: mybill.php");
 ?>
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+
+<h3>อัปโหลดสลิป</h3>
+
+<form method="POST" enctype="multipart/form-data">
+<input type="file" name="slip" required>
+<button name="upload">อัปโหลด</button>
+</form>
+
+</body>
+</html>
