@@ -5,39 +5,18 @@ include 'config/db.php';
 if(isset($_POST['login'])){
     $user = $_POST['username'];
     $pass = $_POST['password'];
-$sql = "SELECT * FROM users WHERE username='$user' AND password='$pass'";
-$res = $conn->query($sql);
 
-if($res->num_rows > 0){
-    $data = $res->fetch_assoc();
-    $_SESSION['user'] = $data;
-    $_SESSION['role'] = 'admin';
+    $stmt = $conn->prepare("SELECT * FROM users WHERE username=?");
+    $stmt->bind_param("s",$user);
+    $stmt->execute();
 
-    header("Location: dashboard.php");
-}else{
-    // ลองเช็คลูกบ้าน
-    $sql2 = "SELECT * FROM customers WHERE username='$user' AND password='$pass'";
-    $res2 = $conn->query($sql2);
+    $result = $stmt->get_result()->fetch_assoc();
 
-    if($res2->num_rows > 0){
-        $data = $res2->fetch_assoc();
-        $_SESSION['customer'] = $data;
-        $_SESSION['role'] = 'customer';
-
-        header("Location: mybill.php");
-    }else{
-        $error = "ชื่อผู้ใช้หรือรหัสผ่านผิด";
-    }
-}
-    $res = $conn->query($sql);
-
-    if($res->num_rows > 0){
-        $data = $res->fetch_assoc();
-        $_SESSION['user'] = $data;
-
+    if($result && password_verify($pass,$result['password'])){
+        $_SESSION['user'] = $result;
         header("Location: dashboard.php");
     }else{
-        $error = "ชื่อผู้ใช้หรือรหัสผ่านผิด";
+        $error = "❌ เข้าสู่ระบบไม่ถูกต้อง";
     }
 }
 ?>
@@ -45,33 +24,21 @@ if($res->num_rows > 0){
 <!DOCTYPE html>
 <html>
 <head>
-    <title>เข้าสู่ระบบ</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<title>Login</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
-<body class="container mt-5" style="font-family: THSarabun, sans-serif;">
+<body class="container mt-5">
 
-<div class="row justify-content-center">
-    <div class="col-md-4">
+<h3>เข้าสู่ระบบ</h3>
 
-        <div class="card p-4 shadow">
-            <h3 class="text-center mb-3">เข้าสู่ระบบ</h3>
+<?php if(isset($error)){ echo "<div class='alert alert-danger'>$error</div>"; } ?>
 
-            <?php if(isset($error)) echo "<div class='alert alert-danger'>$error</div>"; ?>
-
-            <form method="POST">
-                <input type="text" name="username" class="form-control mb-3" placeholder="ชื่อผู้ใช้" required>
-
-                <input type="password" name="password" class="form-control mb-3" placeholder="รหัสผ่าน" required>
-
-                <button name="login" class="btn btn-primary w-100">เข้าสู่ระบบ</button>
-            </form>
-
-        </div>
-
-    </div>
-</div>
+<form method="POST">
+<input type="text" name="username" class="form-control mb-2" placeholder="Username">
+<input type="password" name="password" class="form-control mb-2" placeholder="Password">
+<button name="login" class="btn btn-primary w-100">Login</button>
+</form>
 
 </body>
 </html>
