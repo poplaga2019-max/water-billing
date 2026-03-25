@@ -1,32 +1,26 @@
 <?php
 session_start();
 include 'config/db.php';
-include 'notify.php';
 
-$id = $_GET['id'];
-
-$data = $conn->query("
-SELECT b.*, c.name 
-FROM bills b
-JOIN customers c ON b.customer_id=c.id
-WHERE b.id=$id
-")->fetch_assoc();
-
-// 🔒 เช็ค lock
-if($data['is_locked'] == 1 && $_SESSION['user']['role'] != 'admin'){
-    echo "❌ รอบบิลนี้ถูกปิดแล้ว";
+if(!isset($_SESSION['user'])){
+    header("Location: login.php");
     exit();
 }
 
-// ❗ เปลี่ยนเป็น pending
-$conn->query("UPDATE bills SET status='pending' WHERE id=$id");
+$id = $_GET['id'];
 
-// แจ้ง Telegram
-$msg = "💵 รับเงินสด (รอตรวจสอบ)\n";
-$msg .= "👤 ".$data['name']."\n";
-$msg .= "💰 ".$data['amount']." บาท";
+// 🔒 check lock
+$bill = $conn->query("SELECT * FROM bills WHERE id=$id")->fetch_assoc();
 
-sendTelegram($msg,'payment');
+if($bill['is_locked'] == 1 && $_SESSION['user']['role'] != 'admin'){
+    echo "❌ รอบบิลถูกปิด";
+    exit();
+}
 
-header("Location: bills.php");
+// 👉 เงินสด = รอตรวจสอบ
+$conn->query("
+UPDATE bills SET status='verify' WHERE id=$id
+");
+
+header("Location: bills_mobile.php");
 ?>
