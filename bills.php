@@ -65,16 +65,24 @@ $color = [
 
 <td>
 
+<?php if($r['status'] != 'paid'){ ?>
+
 <a href="pay.php?id=<?=$r['id']?>" class="btn btn-success btn-sm">
-💵 เงินสด
+💵
 </a>
 
 <a href="upload.php?id=<?=$r['id']?>" class="btn btn-warning btn-sm">
-📤 โอน
+📤
 </a>
 
+<?php }else{ ?>
+
+<span class="badge bg-success">✔ จ่ายแล้ว</span>
+
+<?php } ?>
+
 <a href="receipt.php?id=<?=$r['id']?>" target="_blank" class="btn btn-primary btn-sm">
-🧾 ใบเสร็จ
+🧾
 </a>
 
 </td>
