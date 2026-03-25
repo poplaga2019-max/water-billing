@@ -1,22 +1,25 @@
 <?php
-include 'config/db.php';
+function sendTelegram($msg, $type='payment'){
+    include 'config/db.php';
 
-function sendTelegram($msg, $type){
+    $s = [];
+    $rs = $conn->query("SELECT * FROM settings");
+    while($r=$rs->fetch_assoc()){ $s[$r['name']]=$r['value']; }
 
-    global $conn;
+    $token = $s['telegram_token'] ?? '';
+    if(!$token) return;
 
-    $set = $conn->query("SELECT * FROM settings WHERE id=1")->fetch_assoc();
-
-    $token = $set['telegram_token'];
-
-    if($type == 'meter'){
-        $chat_id = $set['telegram_meter'];
-    }else{
-        $chat_id = $set['telegram_payment'];
-    }
+    // เลือกห้อง
+    $chat = '';
+    if($type=='meter') $chat = $s['telegram_meter'] ?? '';
+    if($type=='payment') $chat = $s['telegram_payment'] ?? '';
+    if(!$chat) return;
 
     $url = "https://api.telegram.org/bot$token/sendMessage";
+    $data = [
+        'chat_id' => $chat,
+        'text' => $msg
+    ];
 
-    file_get_contents($url."?chat_id=$chat_id&text=".urlencode($msg));
+    file_get_contents($url.'?'.http_build_query($data));
 }
-?>
