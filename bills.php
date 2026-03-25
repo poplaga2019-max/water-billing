@@ -7,10 +7,11 @@ if(!isset($_SESSION['user'])){
     exit();
 }
 
+// ดึงบิล
 $res = $conn->query("
 SELECT b.*, c.name 
-FROM bills b 
-JOIN customers c ON b.customer_id = c.id
+FROM bills b
+JOIN customers c ON b.customer_id=c.id
 ORDER BY b.id DESC
 ");
 ?>
@@ -18,73 +19,78 @@ ORDER BY b.id DESC
 <!DOCTYPE html>
 <html>
 <head>
-    <title>บิลค่าน้ำ</title>
+<title>บิลค่าน้ำ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
-<body class="container mt-4" style="font-family: THSarabun, sans-serif;">
+<body class="container mt-4">
 
-<h2 class="mb-3">💰 บิลค่าน้ำ</h2>
+<h3>💰 รายการบิล</h3>
 
-<div class="table-responsive">
+<table class="table table-bordered text-center">
 
-<table class="table table-bordered text-center align-middle">
-
-<tr class="table-dark">
-    <th>ชื่อลูกค้า</th>
-    <th>หน่วยใช้</th>
-    <th>จำนวนเงิน</th>
-    <th>สถานะ</th>
-    <th>จัดการ</th>
-    <th>ใบเสร็จ</th>
+<tr>
+<th>ลูกค้า</th>
+<th>หน่วย</th>
+<th>ยอด</th>
+<th>สถานะ</th>
+<th>จัดการ</th>
 </tr>
 
-<?php while($row = $res->fetch_assoc()){ ?>
+<?php while($r = $res->fetch_assoc()){ 
+
+// สีสถานะ
+$statusColor = [
+    'pending' => 'secondary',
+    'verify' => 'warning',
+    'paid' => 'success'
+];
+
+// ข้อความสถานะ
+$statusText = [
+    'pending' => 'ยังไม่ชำระ',
+    'verify' => 'รอตรวจสอบ',
+    'paid' => 'ชำระแล้ว'
+];
+?>
+
 <tr>
 
-    <td><?= $row['name'] ?></td>
+<td><?= $r['name'] ?></td>
+<td><?= $r['used_unit'] ?></td>
+<td><?= number_format($r['amount']) ?></td>
 
-    <td><?= $row['used_unit'] ?></td>
+<td>
+<span class="badge bg-<?= $statusColor[$r['status']] ?>">
+<?= $statusText[$r['status']] ?>
+</span>
+</td>
 
-    <td><?= number_format($row['amount']) ?> บาท</td>
+<td>
 
-    <td>
-        <?php if($row['status']=='paid'){ ?>
-            <span class="badge bg-success">จ่ายแล้ว</span>
-        <?php }else{ ?>
-            <span class="badge bg-danger">ยังไม่จ่าย</span>
-        <?php } ?>
-    </td>
+<!-- จ่ายเงินสด -->
+<?php if($r['status'] != 'paid'){ ?>
+<a href="pay.php?id=<?= $r['id'] ?>" class="btn btn-success btn-sm">
+💵 เงินสด
+</a>
+<?php } ?>
 
-    <td>
-        <?php if($row['status']!='paid'){ ?>
-            <a href="pay.php?id=<?= $row['id'] ?>" class="btn btn-success btn-sm">
-                รับเงิน
-            </a>
-        <?php }else{ ?>
-            ✔
-        <?php } ?>
-    </td>
+<!-- ใบเสร็จ -->
+<a href="receipt.php?id=<?= $r['id'] ?>" target="_blank" class="btn btn-primary btn-sm">
+🧾 ใบเสร็จ
+</a>
 
-    <td>
-        <a href="receipt.php?id=<?= $row['id'] ?>" class="btn btn-primary btn-sm">
-            PDF
-        </a>
-    </td>
+</td>
 
 </tr>
+
 <?php } ?>
 
 </table>
 
-</div>
-
-<br>
-
-<a href="dashboard.php" class="btn btn-secondary w-100">⬅ กลับแดชบอร์ด</a>
+<a href="dashboard.php" class="btn btn-dark w-100">⬅ กลับ</a>
 
 </body>
 </html>
