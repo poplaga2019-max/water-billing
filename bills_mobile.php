@@ -19,13 +19,11 @@ ORDER BY b.id DESC
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
 .big-btn{padding:12px;font-size:16px}
 </style>
-
 </head>
 
 <body class="container mt-3">
@@ -52,6 +50,8 @@ echo $status[$r['status']];
 ?>
 </p>
 
+<?php if($r['status'] != 'paid'){ ?>
+
 <div class="d-flex gap-2">
 
 <a href="pay.php?id=<?=$r['id']?>" class="btn btn-success w-50 big-btn">
@@ -63,6 +63,14 @@ echo $status[$r['status']];
 </a>
 
 </div>
+
+<?php }else{ ?>
+
+<div class="alert alert-success text-center">
+✔ ชำระแล้ว
+</div>
+
+<?php } ?>
 
 <a href="receipt.php?id=<?=$r['id']?>" target="_blank"
 class="btn btn-primary w-100 big-btn mt-2">
